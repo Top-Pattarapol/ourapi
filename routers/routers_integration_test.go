@@ -1,20 +1,25 @@
-package routers
+// +build integration
+
+package routers_test
 
 import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/ourapi/routers"
+	"github.com/ourapi/users"
 )
 
 func TestGetAllUsers(t *testing.T) {
-	e := NewRouter()
+	e := routers.NewRouter()
 	resp := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "/users", nil)
 
 	e.ServeHTTP(resp, req)
 
-	var uu []User
+	var uu []users.User
 	json.NewDecoder(resp.Body).Decode(&uu)
 
 	if http.StatusOK != resp.Code {
