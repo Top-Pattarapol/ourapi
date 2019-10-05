@@ -9,12 +9,23 @@ type Decoder interface {
 	Decode(result interface{}) error
 }
 
-type typicode struct {
-	URL string
+type Doer interface {
+	Do() (resp *http.Response, err error)
 }
 
+type doGet struct {
+	url string
+}
+
+func (do *doGet) Do() (resp *http.Response, err error) {
+	return http.Get(do.url)
+}
+
+type typicode struct {
+	client Doer
+}
 func (tc *typicode) Decode(result interface{}) error {
-	resp, err := http.Get(tc.URL)
+	resp, err := tc.client.Do()
 	if err != nil {
 		return err
 	}
@@ -23,6 +34,8 @@ func (tc *typicode) Decode(result interface{}) error {
 
 func Get(path string) *typicode {
 	return &typicode{
-		"https://jsonplaceholder.typicode.com" + path,
+		&doGet{
+			"https://jsonplaceholder.typicode.com" + path,
+		},
 	}
 }
