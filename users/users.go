@@ -1,10 +1,10 @@
 package users
 
 import (
-"encoding/json"
-"net/http"
+	"github.com/ourapi/typicode"
+	"net/http"
 
-"github.com/labstack/echo"
+	"github.com/labstack/echo"
 )
 
 type User struct {
@@ -17,17 +17,6 @@ type User struct {
 
 type Decoder interface {
 	Decode(result interface{}) error
-}
-
-type typicode struct {
-}
-
-func (tc *typicode) Decode(result interface{}) error {
-	resp, err := http.Get("https://jsonplaceholder.typicode.com/users")
-	if err != nil {
-		return err
-	}
-	return json.NewDecoder(resp.Body).Decode(&result)
 }
 
 type usersApi struct {
@@ -45,7 +34,7 @@ func (u *usersApi) getUsers(c echo.Context) error {
 
 func GetUsers(c echo.Context) error {
 	api := &usersApi{
-		&typicode{},
+		typicode.Get("/users"),
 	}
 	return api.getUsers(c)
 }
