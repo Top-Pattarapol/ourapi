@@ -15,17 +15,37 @@ type User struct {
 	Phone    string `json:"phone"`
 }
 
-func GetUsers(c echo.Context) error {
+type Decoder interface {
+	Decode(result interface{}) error
+}
+
+type typicode struct {
+}
+
+func (tc *typicode) Decode(result interface{}) error {
 	resp, err := http.Get("https://jsonplaceholder.typicode.com/users")
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err)
+		return err
 	}
+	return json.NewDecoder(resp.Body).Decode(&result)
+}
 
+type usersApi struct {
+	sevice Decoder
+}
+
+func (u *usersApi) getUsers(c echo.Context) error {
 	uu := []User{}
-	err = json.NewDecoder(resp.Body).Decode(&uu)
+	err := u.sevice.Decode(&uu)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err.Error())
 	}
-
 	return c.JSON(http.StatusOK, uu)
+}
+
+func GetUsers(c echo.Context) error {
+	api := &usersApi{
+		&typicode{},
+	}
+	return api.getUsers(c)
 }
